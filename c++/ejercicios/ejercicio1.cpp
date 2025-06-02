@@ -11,7 +11,6 @@ a la izquierda, el array primero se convertirá en [3,3,6,4]
 , y luego en [12,4]
 */
 
-
 #include <iostream>
 using namespace std;
 
@@ -20,11 +19,52 @@ struct nodo {
     nodo* siguiente;
 };
 
+void imprimirLista(nodo* cabeza) {
+    nodo* actual = cabeza;
+    while (actual != nullptr) {
+        cout << actual->dato << " ";
+        actual = actual->siguiente;
+    }
+    cout << endl;
+}
+
+void colapsarLista(nodo*& cabeza) {
+    bool colapsado;
+    do {
+        colapsado = false;
+        nodo* actual = cabeza;
+        nodo* anterior = nullptr;
+        
+        while (actual != nullptr && actual->siguiente != nullptr) {
+            if (actual->dato == actual->siguiente->dato) {
+                // Colapsar nodos adyacentes
+                int suma = actual->dato + actual->siguiente->dato;
+                actual->dato = suma;
+                
+                nodo* eliminar = actual->siguiente;
+                actual->siguiente = eliminar->siguiente;
+                delete eliminar;
+                
+                colapsado = true;
+                break; // Solo colapsar un par a la vez
+            }
+            anterior = actual;
+            actual = actual->siguiente;
+        }
+        
+        if (colapsado) {
+            cout << "Después de colapsar: ";
+            imprimirLista(cabeza);
+        }
+    } while (colapsado);
+}
+
 int main() {
     nodo* cabeza = nullptr;
     nodo* ultimo = nullptr;
 
-    for (int i = 0; i < 4; i++) {
+    // Ingresar los números iniciales
+    for (int i = 0; i < 3; i++) {
         int num;
         cout << "Ingrese un numero: ";
         cin >> num;
@@ -42,32 +82,43 @@ int main() {
         }
     }
 
-    // Acceder al nodo 2 (por ejemplo)
-    nodo* actual = cabeza;
-    int posicion = 1;
+    cout << "Lista inicial: ";
+    imprimirLista(cabeza);
 
-    while (actual != nullptr && posicion < 2) {
-        actual = actual->siguiente;
-        posicion++;
-    }
+    // Agregar nuevo número al inicio o final
+    char opcion;
+    int numeroColapso;
+    cout << "¿Agregar al inicio (i) o al final (f)? ";
+    cin >> opcion;
+    cout << "Ingrese el número a agregar: ";
+    cin >> numeroColapso;
 
-    if (actual != nullptr) {
-        cout << "Dato del nodo 2: " << actual->dato << endl;
+    nodo* nuevo = new nodo;
+    nuevo->dato = numeroColapso;
+
+    if (opcion == 'i') {
+        nuevo->siguiente = cabeza;
+        cabeza = nuevo;
     } else {
-        cout << "No existe el nodo 2." << endl;
+        nuevo->siguiente = nullptr;
+        if (cabeza == nullptr) {
+            cabeza = nuevo;
+        } else {
+            ultimo->siguiente = nuevo;
+        }
     }
 
-    // Mostrar la lista
-    cout << "Lista ingresada: ";
-    actual = cabeza;
-    while (actual != nullptr) {
-        cout << actual->dato << " ";
-        actual = actual->siguiente;
-    }
-    cout << endl;
+    cout << "Lista después de agregar: ";
+    imprimirLista(cabeza);
+
+    // Colapsar pares adyacentes
+    colapsarLista(cabeza);
+
+    cout << "Lista final: ";
+    imprimirLista(cabeza);
 
     // Liberar memoria
-    actual = cabeza;
+    nodo* actual = cabeza;
     while (actual != nullptr) {
         nodo* temp = actual;
         actual = actual->siguiente;
